@@ -133,7 +133,16 @@ def _get_models(config_path=None):
             depth_confidence=config['depth_confidence'],
             width_confidence=config['width_confidence'],
             filter_threshold=config['filter_threshold'],
+            mp=True,
         ).eval().to(device)
+
+        # torch.compile fuses transformer kernels for faster matching
+        if device.type == 'cuda':
+            try:
+                matcher.compile()
+                print('LightGlue: torch.compile() enabled')
+            except Exception as e:
+                print('LightGlue: torch.compile() failed (%s), using eager mode' % e)
 
         _EXTRACTOR = extractor
         _MATCHER = matcher
@@ -184,7 +193,7 @@ def _features_to_torch(feats_dict, device):
 
 def _match_pair_score(matcher, feats0_torch, feats1_torch):
     """Run LightGlue on a feature pair and return sum of match confidences."""
-    with torch.no_grad():
+    with torch.inference_mode():
         result = matcher({'image0': feats0_torch, 'image1': feats1_torch})
     result = rbd(result)
     # After rbd, 'scores' is a 1D tensor of per-match confidence values

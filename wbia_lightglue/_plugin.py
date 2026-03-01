@@ -52,7 +52,7 @@ def lightglue_compute_features(ibs, aid_list, config_path=None):
     chips = ibs.get_annot_chips(aid_list)
 
     results = []
-    with torch.no_grad():
+    with torch.inference_mode():
         for chip in chips:
             img_tensor = _chip_to_tensor(chip).to(device)
             feats = extractor.extract(img_tensor, resize=image_size)
@@ -154,11 +154,13 @@ def lightglue_match_scores(ibs, qaid, daid_list, config_path=None):
     query_feats = all_feats[0]
     db_feats_list = all_feats[1:]
 
-    query_torch = _features_to_torch(query_feats, device)
+    # Batch-transfer all features to GPU at once to amortize PCIe overhead
+    with torch.inference_mode():
+        query_torch = _features_to_torch(query_feats, device)
+        db_torch_list = [_features_to_torch(f, device) for f in db_feats_list]
 
     scores = []
-    for db_feats in db_feats_list:
-        db_torch = _features_to_torch(db_feats, device)
+    for db_torch in db_torch_list:
         score = _match_pair_score(matcher, query_torch, db_torch)
         scores.append(score)
 
