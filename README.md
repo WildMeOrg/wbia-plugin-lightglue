@@ -86,7 +86,7 @@ The plugin reads configuration from a JSON file, falling back to built-in defaul
 | `ibs.lightglue_compute_features` | `(aid_list, config_path=None)` | Extract ALIKED features for a list of annotations |
 | `ibs.lightglue_features` | `(aid_list, config_path=None, use_depc=True)` | Get features with LRU caching and optional depc backing |
 | `ibs.lightglue_match_scores` | `(qaid, daid_list, config_path=None)` | Compute raw match scores (query vs each database annotation) |
-| `ibs.lightglue_evaluate` | `(aid_list, config_path=None, ranks=(1,5,10,20))` | Run 1-vs-all CMC evaluation on a set of annotations |
+| `ibs.lightglue_evaluate` | `(aid_list, config_path=None, ranks=(1,5,10,20))` | Run 1-vs-all CMC evaluation; returns Rank-1 accuracy as float |
 
 ### Depc tables
 
