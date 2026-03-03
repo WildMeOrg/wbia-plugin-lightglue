@@ -216,8 +216,8 @@ def get_match_results(depc, qaid_list, daid_list, score_list, config):
         grouped_annot_scores = vt.apply_grouping(
             annot_scores, match_result.name_groupxs
         )
-        # nsum: sum of annotation scores per name (HotSpotter-style)
-        name_scores = np.array([np.sum(s) for s in grouped_annot_scores])
+        # max: best annotation score per name (correct for embedding matchers)
+        name_scores = np.array([np.max(s) for s in grouped_annot_scores])
         match_result.set_cannonical_name_score(annot_scores, name_scores)
         yield match_result
 
