@@ -199,8 +199,8 @@ def get_match_results(depc, qaid_list, daid_list, score_list, config):
         daid_list_ = np.array(daids)
         dnid_list_ = np.array(dnids)
 
-        # Remove self-match and zero-score entries
-        is_valid = (daid_list_ != qaid) & (annot_scores > 0)
+        # Remove distance to self
+        is_valid = daid_list_ != qaid
         daid_list_ = daid_list_.compress(is_valid)
         dnid_list_ = dnid_list_.compress(is_valid)
         annot_scores = annot_scores.compress(is_valid)
