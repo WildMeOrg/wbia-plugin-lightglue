@@ -154,15 +154,25 @@ def lightglue_match_scores(ibs, qaid, daid_list, config_path=None):
     query_feats = all_feats[0]
     db_feats_list = all_feats[1:]
 
+    # If the query annotation has no features, return all zeros
+    if query_feats is None:
+        return [0.0] * len(daid_list)
+
     # Batch-transfer all features to GPU at once to amortize PCIe overhead
     with torch.inference_mode():
         query_torch = _features_to_torch(query_feats, device)
-        db_torch_list = [_features_to_torch(f, device) for f in db_feats_list]
+        db_torch_list = [
+            _features_to_torch(f, device) if f is not None else None
+            for f in db_feats_list
+        ]
 
     scores = []
     for db_torch in db_torch_list:
-        score = _match_pair_score(matcher, query_torch, db_torch)
-        scores.append(score)
+        if db_torch is None:
+            scores.append(0.0)
+        else:
+            score = _match_pair_score(matcher, query_torch, db_torch)
+            scores.append(score)
 
     return scores
 
